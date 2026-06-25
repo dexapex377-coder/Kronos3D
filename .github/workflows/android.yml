@@ -39,9 +39,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: ${{ env.ANDROID_SDK_VERSION }}
-          ndk-version: ${{ env.NDK_VERSION }}
-          cmake-version: ${{ env.CMAKE_VERSION }}
+          packages: |
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
+            build-tools;34.0.0
+            ndk;${{ env.NDK_VERSION }}
+            cmake;${{ env.CMAKE_VERSION }}
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -91,9 +93,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: ${{ env.ANDROID_SDK_VERSION }}
-          ndk-version: ${{ env.NDK_VERSION }}
-          cmake-version: ${{ env.CMAKE_VERSION }}
+          packages: |
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
+            build-tools;34.0.0
+            ndk;${{ env.NDK_VERSION }}
+            cmake;${{ env.CMAKE_VERSION }}
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -156,8 +160,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: ${{ env.ANDROID_SDK_VERSION }}
-          ndk-version: ${{ env.NDK_VERSION }}
+          packages: |
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
+            build-tools;34.0.0
+            ndk;${{ env.NDK_VERSION }}
 
       - name: Run Unit Tests
         run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
@@ -187,7 +193,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: ${{ env.ANDROID_SDK_VERSION }}
+          packages: |
+            platforms;android-${{ env.ANDROID_SDK_VERSION }}
+            build-tools;34.0.0
 
       - name: Run Lint
         run: ./gradlew :app:lintDebug --no-daemon
