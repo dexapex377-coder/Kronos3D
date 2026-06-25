@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Kronos3D</string>
+    <string name="app_version">0.1.0</string>
+    <string name="renderer_vulkan">Vulkan</string>
+    <string name="renderer_gles">OpenGL ES 3.2</string>
+    <string name="error_init_failed">Engine initialization failed</string>
+    <string name="error_vulkan_unavailable">Vulkan not available, falling back to OpenGL ES</string>
+</resources>
