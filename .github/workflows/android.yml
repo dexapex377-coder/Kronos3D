@@ -22,7 +22,7 @@ jobs:
       - name: Build
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log; exit ${PIPESTATUS[0]}
 
       - name: APK info
         run: |

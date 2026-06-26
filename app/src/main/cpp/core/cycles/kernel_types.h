@@ -21,10 +21,10 @@ struct KernelGlobals {
     int transparent_bounces;
 
     // Camera
-    float3 camera_p;
-    float3 camera_d;
-    float3 camera_u;
-    float3 camera_v;
+    Vec3 camera_p;
+    Vec3 camera_d;
+    Vec3 camera_u;
+    Vec3 camera_v;
     float camera_aperture;
     float camera_focal;
     float camera_fstop;
@@ -36,7 +36,7 @@ struct KernelGlobals {
 
     // Background
     int background_type; // 0=sky, 1=texture
-    float3 background_color;
+    Vec3 background_color;
 
     // BVH
     int bvh_root;
@@ -64,8 +64,8 @@ struct KernelGlobals {
 };
 
 struct Ray {
-    float3 P;
-    float3 D;
+    Vec3 P;
+    Vec3 D;
     float tmin, tmax;
     float time;
     int depth;
@@ -82,11 +82,11 @@ struct Intersection {
 };
 
 struct ShaderData {
-    float3 N;
-    float3 Ng;
-    float3 P;
-    float3 V;
-    float3 dPdu, dPdv;
+    Vec3 N;
+    Vec3 Ng;
+    Vec3 P;
+    Vec3 V;
+    Vec3 dPdu, dPdv;
     float u, v;
     int shader_id;
     int object_id;
@@ -94,16 +94,16 @@ struct ShaderData {
 };
 
 struct LightSample {
-    float3 P;
-    float3 N;
-    float3 Le;
+    Vec3 P;
+    Vec3 N;
+    Vec3 Le;
     float pdf;
     int light_id;
 };
 
 struct PathState {
     Ray ray;
-    float3 throughput;
+    Vec3 throughput;
     int depth;
     int bounce;
     bool terminated;
@@ -111,43 +111,43 @@ struct PathState {
 };
 
 // Kernel math functions (NEON optimized)
-inline float3 kernel_ray_intersect_triangle(const Ray& ray, const float3& v0, const float3& v1, const float3& v2, float& u, float& v) {
-    float3 e1 = v1 - v0;
-    float3 e2 = v2 - v0;
-    float3 h = cross(ray.D, e2);
+inline Vec3 kernel_ray_intersect_triangle(const Ray& ray, const Vec3& v0, const Vec3& v1, const Vec3& v2, float& u, float& v) {
+    Vec3 e1 = v1 - v0;
+    Vec3 e2 = v2 - v0;
+    Vec3 h = cross(ray.D, e2);
     float a = dot(e1, h);
-    if (fabsf(a) < 1e-8f) return float3{0,0,0}; // parallel
+    if (fabsf(a) < 1e-8f) return Vec3{0,0,0}; // parallel
 
     float f = 1.0f / a;
-    float3 s = ray.P - v0;
+    Vec3 s = ray.P - v0;
     u = f * dot(s, h);
-    if (u < 0.0f || u > 1.0f) return float3{0,0,0};
+    if (u < 0.0f || u > 1.0f) return Vec3{0,0,0};
 
-    float3 q = cross(s, e1);
+    Vec3 q = cross(s, e1);
     v = f * dot(ray.D, q);
-    if (v < 0.0f || u + v > 1.0f) return float3{0,0,0};
+    if (v < 0.0f || u + v > 1.0f) return Vec3{0,0,0};
 
     float t = f * dot(e2, q);
-    if (t < ray.tmin || t > ray.tmax) return float3{0,0,0};
+    if (t < ray.tmin || t > ray.tmax) return Vec3{0,0,0};
 
-    return float3{t, u, v};
+    return Vec3{t, u, v};
 }
 
 // Möller-Trumbore intersection
-inline bool intersect_triangle(const Ray& ray, const float3& v0, const float3& v1, const float3& v2, float& t, float& u, float& v) {
-    float3 edge1 = v1 - v0;
-    float3 edge2 = v2 - v0;
-    float3 h = cross(ray.D, edge2);
+inline bool intersect_triangle(const Ray& ray, const Vec3& v0, const Vec3& v1, const Vec3& v2, float& t, float& u, float& v) {
+    Vec3 edge1 = v1 - v0;
+    Vec3 edge2 = v2 - v0;
+    Vec3 h = cross(ray.D, edge2);
     float a = dot(edge1, h);
 
     if (fabsf(a) < 1e-8f) return false;
     float f = 1.0f / a;
 
-    float3 s = ray.P - v0;
+    Vec3 s = ray.P - v0;
     u = f * dot(s, h);
     if (u < 0.0f || u > 1.0f) return false;
 
-    float3 q = cross(s, edge1);
+    Vec3 q = cross(s, edge1);
     v = f * dot(ray.D, q);
     if (v < 0.0f || u + v > 1.0f) return false;
 
@@ -157,8 +157,8 @@ inline bool intersect_triangle(const Ray& ray, const float3& v0, const float3& v
 
 // BVH traversal (ported from kernel_bvh.h)
 struct BVHNode {
-    float3 bounds_min[2];
-    float3 bounds_max[2];
+    Vec3 bounds_min[2];
+    Vec3 bounds_max[2];
     int children[2]; // leaf: prim_offset, prim_count in children[0]
     int prim_offset;
     int prim_count;
@@ -167,7 +167,7 @@ struct BVHNode {
 };
 
 inline bool bvh_node_intersect(const Ray& ray, const BVHNode& node, float& tmin, float& tmax) {
-    float3 invD = {1.0f/ray.D.x, 1.0f/ray.D.y, 1.0f/ray.D.z};
+    Vec3 invD = {1.0f/ray.D.x, 1.0f/ray.D.y, 1.0f/ray.D.z};
     int sign[3] = {invD.x < 0, invD.y < 0, invD.z < 0};
 
     float t1 = (node.bounds_min[sign[0]].x - ray.P.x) * invD.x;
@@ -190,9 +190,9 @@ inline bool bvh_node_intersect(const Ray& ray, const BVHNode& node, float& tmin,
 }
 
 // Path tracing kernel (simplified from kernel_path_integrate.h)
-inline float3 path_trace(KernelGlobals* kg, Ray ray, uint32_t& rng_state) {
-    float3 throughput = {1.0f, 1.0f, 1.0f};
-    float3 radiance = {0.0f, 0.0f, 0.0f};
+inline Vec3 path_trace(KernelGlobals* kg, Ray ray, uint32_t& rng_state) {
+    Vec3 throughput = {1.0f, 1.0f, 1.0f};
+    Vec3 radiance = {0.0f, 0.0f, 0.0f};
 
     for (int bounce = 0; bounce < kg->max_bounces; ++bounce) {
         // BVH traversal
