@@ -4,9 +4,9 @@
 #include <EGL/egl.h>
 #include <vector>
 #include <string>
-#include "../../core/math/vector.h"
-#include "../../core/math/matrix.h"
-#include "../../core/mesh/bmesh.h"
+#include "math/vector.h"
+#include "math/matrix.h"
+#include "mesh/bmesh.h"
 
 namespace kronos {
 namespace opengl {

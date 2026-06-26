@@ -40,6 +40,10 @@ inline Vec2 operator*(Vec2 a, float s) { return {a.x * s, a.y * s}; }
 inline Vec3 operator*(Vec3 a, float s) { return {a.x * s, a.y * s, a.z * s}; }
 inline Vec4 operator*(Vec4 a, float s) { return {a.x * s, a.y * s, a.z * s, a.w * s}; }
 
+inline Vec2 operator*(Vec2 a, Vec2 b) { return {a.x * b.x, a.y * b.y}; }
+inline Vec3 operator*(Vec3 a, Vec3 b) { return {a.x * b.x, a.y * b.y, a.z * b.z}; }
+inline Vec4 operator*(Vec4 a, Vec4 b) { return {a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w}; }
+
 inline Vec2 operator/(Vec2 a, float s) { return {a.x / s, a.y / s}; }
 inline Vec3 operator/(Vec3 a, float s) { return {a.x / s, a.y / s, a.z / s}; }
 inline Vec4 operator/(Vec4 a, float s) { return {a.x / s, a.y / s, a.z / s, a.w / s}; }
