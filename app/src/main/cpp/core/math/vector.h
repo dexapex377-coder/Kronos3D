@@ -4,9 +4,21 @@
 
 namespace kronos {
 
-struct float2_t { float x, y; };
-struct float3_t { float x, y, z; };
-struct float4_t { float x, y, z, w; };
+struct float2_t {
+    float x, y;
+    float& operator[](int i) { return (&x)[i]; }
+    const float& operator[](int i) const { return (&x)[i]; }
+};
+struct float3_t {
+    float x, y, z;
+    float& operator[](int i) { return (&x)[i]; }
+    const float& operator[](int i) const { return (&x)[i]; }
+};
+struct float4_t {
+    float x, y, z, w;
+    float& operator[](int i) { return (&x)[i]; }
+    const float& operator[](int i) const { return (&x)[i]; }
+};
 
 using Vec2 = float2_t;
 using Vec3 = float3_t;

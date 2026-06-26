@@ -28,7 +28,7 @@ using int4 = int[4];
 constexpr float PI = 3.14159265358979323846f;
 constexpr float DEG2RAD = PI / 180.0f;
 constexpr float RAD2DEG = 180.0f / PI;
-constexpr float FLT_EPSILON = 1.192092896e-07f;
+constexpr float KRONOS_EPSILON = 1.192092896e-07f;
 
 inline float square(float x) { return x * x; }
 inline float clamp(float x, float min, float max) { return x < min ? min : (x > max ? max : x); }
