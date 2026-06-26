@@ -149,10 +149,16 @@ GLMesh GLRenderer::upload_mesh(const BMesh& bmesh) {
             indices.push_back(l->next->vert->index);
             indices.push_back(l->next->next->vert->index);
         } else if (f.len == 4) {
-            indices.push_back(l->vert->index);
-            indices.push_back(l->next->vert->index);
-            indices.push_back(l->next->next->vert->index);
-            indices.push_back(l->next->next->next->vert->index);
+            unsigned int a = l->vert->index;
+            unsigned int b = l->next->vert->index;
+            unsigned int c = l->next->next->vert->index;
+            unsigned int d = l->next->next->next->vert->index;
+            indices.push_back(a);
+            indices.push_back(b);
+            indices.push_back(c);
+            indices.push_back(a);
+            indices.push_back(c);
+            indices.push_back(d);
         }
     }
 
