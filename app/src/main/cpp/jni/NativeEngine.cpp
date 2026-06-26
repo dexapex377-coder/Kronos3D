@@ -2,6 +2,7 @@
 #include <android/log.h>
 #include <cstring>
 #include <ctime>
+#include <vector>
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "Kronos3D-JNI", __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "Kronos3D-JNI", __VA_ARGS__)
@@ -22,11 +23,23 @@ static bool check_vulkan_support() {
     create_info.pApplicationInfo = &app_info;
 
     VkInstance instance;
-    if (vkCreateInstance(&create_info, nullptr, &instance) == VK_SUCCESS) {
-        vkDestroyInstance(instance, nullptr);
-        return true;
+    if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS)
+        return false;
+
+    uint32_t count = 0;
+    vkEnumeratePhysicalDevices(instance, &count, nullptr);
+    if (count == 0) { vkDestroyInstance(instance, nullptr); return false; }
+
+    std::vector<VkPhysicalDevice> devices(count);
+    vkEnumeratePhysicalDevices(instance, &count, devices.data());
+    bool found = false;
+    for (auto& pd : devices) {
+        VkPhysicalDeviceProperties props;
+        vkGetPhysicalDeviceProperties(pd, &props);
+        if (props.apiVersion >= VK_API_VERSION_1_2) { found = true; break; }
     }
-    return false;
+    vkDestroyInstance(instance, nullptr);
+    return found;
 }
 
 extern "C" {

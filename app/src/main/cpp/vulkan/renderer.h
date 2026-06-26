@@ -98,7 +98,7 @@ struct Pipeline {
 class Renderer {
 public:
     Renderer() = default;
-    ~Renderer() { cleanup(); }
+    ~Renderer() { if (ctx_) cleanup(); }
 
     bool init(VulkanContext& ctx, ANativeWindow* window, int width, int height);
     void cleanup();
