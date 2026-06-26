@@ -17,25 +17,19 @@ jobs:
 
       - uses: android-actions/setup-android@v3
         with:
-          packages: platforms;android-34,build-tools;34.0.0,ndk;26.1.10909125
+          packages: |
+            platforms;android-34
+            build-tools;34.0.0
+            ndk;26.1.10909125
 
-      - name: Env debug
-        run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "JAVA_HOME=$JAVA_HOME"
-          ls -la "$ANDROID_SDK_ROOT/ndk/" 2>/dev/null || echo "no ndk dir"
-          ls -la "$ANDROID_SDK_ROOT/platforms/" 2>/dev/null || echo "no platforms dir"
-          ls -la "$ANDROID_SDK_ROOT/build-tools/" 2>/dev/null || echo "no build-tools dir"
-          echo "--- gradle version ---"
-          ./gradlew --version --no-daemon 2>&1
+      - name: Setup local.properties
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
       - name: Build
         run: |
           ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-        shell: bash
 
-      - name: List APK
+      - name: Find APK
         run: find app/build -name "*.apk" 2>/dev/null || echo "no apk"
 
       - uses: actions/upload-artifact@v4
