@@ -13,7 +13,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
-        ndkVersion = "27.0.12077973"
+        ndkVersion = "26.1.10909125"
 
         ndk {
             val abiFilter = project.properties["abi"]?.toString()

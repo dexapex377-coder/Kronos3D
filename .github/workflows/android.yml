@@ -15,15 +15,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - uses: android-actions/setup-android@v3
+      - name: Install SDK + NDK
+        uses: android-actions/setup-android@v3
         with:
-          packages: |
-            platforms;android-34
-            build-tools;34.0.0
-            ndk;27.0.12077973
+          packages: platforms;android-34,build-tools;34.0.0,ndk;26.1.10909125
 
       - name: Build
-        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1
+        run: |
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1
+          echo "=== find APK ==="
+          find app/build -name "*.apk" 2>/dev/null || echo "no apk"
 
       - uses: actions/upload-artifact@v4
         if: always()
