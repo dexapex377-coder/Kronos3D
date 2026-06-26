@@ -80,8 +80,7 @@ private:
 };
 
 // PBR Shader Sources (GLSL ES 3.2)
-constexpr const char* PBR_VERTEX_SHADER = R"(
-#version 320 es
+constexpr const char* PBR_VERTEX_SHADER = R"(#version 320 es
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aUV;
@@ -104,8 +103,7 @@ void main() {
 }
 )";
 
-constexpr const char* PBR_FRAGMENT_SHADER = R"(
-#version 320 es
+constexpr const char* PBR_FRAGMENT_SHADER = R"(#version 320 es
 precision highp float;
 
 in vec3 WorldPos;
@@ -121,10 +119,8 @@ uniform float uTime;
 
 out vec4 FragColor;
 
-// Constants
 const float PI = 3.14159265359;
 
-// Material parameters (would come from material system)
 vec3 albedo = vec3(0.8, 0.1, 0.1);
 float metallic = 0.0;
 float roughness = 0.5;
@@ -134,20 +130,20 @@ vec3 F_Schlick(vec3 F0, float cosTheta) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float D_GGX(float NdotH, float roughness) {
+float D_GGX(float NdH, float roughness) {
     float a = roughness * roughness;
     float a2 = a * a;
-    float NdotH2 = NdotH * NdotH;
-    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    float NdH2 = NdH * NdH;
+    float denom = (NdH2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
     return a2 / denom;
 }
 
-float V_SmithGGX(float NdotV, float NdotL, float roughness) {
+float geo_Smith(float NdV, float NdL, float roughness) {
     float k = (roughness + 1.0) * (roughness + 1.0) / 8.0;
-    float GV = NdotV * (1.0 - k) + k;
-    float GL = NdotL * (1.0 - k) + k;
-    return 0.5 / (GV * GL);
+    float gv = NdV * (1.0 - k) + k;
+    float gl = NdL * (1.0 - k) + k;
+    return 0.5 / (gv * gl);
 }
 
 void main() {
@@ -156,42 +152,33 @@ void main() {
     vec3 L = normalize(-uLightDir);
     vec3 H = normalize(V + L);
 
-    float NdotV = max(dot(N, V), 0.001);
-    float NdotL = max(dot(N, L), 0.0);
-    float NdotH = max(dot(N, H), 0.0);
-    float VdotH = max(dot(V, H), 0.0);
+    float NdV = max(dot(N, V), 0.001);
+    float NdL = max(dot(N, L), 0.0);
+    float NdH = max(dot(N, H), 0.0);
+    float VdH = max(dot(V, H), 0.0);
 
-    // F0
     vec3 F0 = mix(vec3(0.04), albedo, metallic);
-    vec3 F = F_Schlick(F0, VdotH);
+    vec3 F = F_Schlick(F0, VdH);
 
-    // NDF
-    float D = D_GGX(NdotH, roughness);
+    float D = D_GGX(NdH, roughness);
 
-    // Geometry
-    float V = V_SmithGGX(NdotV, NdotL, roughness);
+    float G = geo_Smith(NdV, NdL, roughness);
 
-    // Specular BRDF
-    vec3 numerator = D * V * F;
-    float denominator = 4.0 * NdotV * NdotL + 0.001;
-    vec3 specular = numerator / denominator;
+    vec3 num = D * G * F;
+    float den = 4.0 * NdV * NdL + 0.001;
+    vec3 specular = num / den;
 
-    // Diffuse BRDF
     vec3 kD = (1.0 - F) * (1.0 - metallic);
     vec3 diffuse = kD * albedo / PI;
 
-    // Lighting
     vec3 radiance = uLightColor * uLightIntensity;
-    vec3 Lo = (diffuse + specular) * radiance * NdotL;
+    vec3 Lo = (diffuse + specular) * radiance * NdL;
 
-    // Ambient
     vec3 ambient = vec3(0.03) * albedo * ao * uAmbientIntensity;
 
     vec3 color = ambient + Lo;
 
-    // Tone mapping (ACES)
     color = color / (color + vec3(1.0));
-    // Gamma correction
     color = pow(color, vec3(1.0/2.2));
 
     FragColor = vec4(color, 1.0);
@@ -199,8 +186,7 @@ void main() {
 )";
 
 // Simple unlit shader for wireframe/debug
-constexpr const char* UNLIT_VERTEX_SHADER = R"(
-#version 320 es
+constexpr const char* UNLIT_VERTEX_SHADER = R"(#version 320 es
 layout(location = 0) in vec3 aPos;
 uniform mat4 uModel;
 uniform mat4 uView;
@@ -210,8 +196,7 @@ void main() {
 }
 )";
 
-constexpr const char* UNLIT_FRAGMENT_SHADER = R"(
-#version 320 es
+constexpr const char* UNLIT_FRAGMENT_SHADER = R"(#version 320 es
 precision highp float;
 uniform vec3 uColor;
 out vec4 FragColor;
