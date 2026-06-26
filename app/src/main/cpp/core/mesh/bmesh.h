@@ -112,6 +112,9 @@ struct BMesh {
     // Create primitive cube
     static BMesh cube(float size = 1.0f) {
         BMesh bm;
+        bm.verts.reserve(8);
+        bm.loops.reserve(24);
+        bm.faces.reserve(6);
         float h = size * 0.5f;
         Vec3 coords[8] = {
             {-h,-h,-h}, {h,-h,-h}, {h,h,-h}, {-h,h,-h},
@@ -149,6 +152,9 @@ struct BMesh {
     // Create UV sphere
     static BMesh uv_sphere(float radius = 1.0f, int segments = 32, int rings = 16) {
         BMesh bm;
+        bm.verts.reserve((rings + 1) * segments);
+        bm.loops.reserve(rings * segments * 3 * 2); // max 6 per quad (triangulated)
+        bm.faces.reserve(rings * segments * 2);
         for (int r = 0; r <= rings; ++r) {
             float phi = PI * r / rings;
             float y = cosf(phi);
