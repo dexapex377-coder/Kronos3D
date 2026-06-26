@@ -102,7 +102,7 @@ void GLRenderer::draw_frame(const Uniforms& uniforms, const GLMesh& mesh) {
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
 
     glUseProgram(default_shader_.program);
 
