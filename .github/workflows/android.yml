@@ -36,8 +36,13 @@ jobs:
       - name: Build
         id: build
         continue-on-error: true
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
+          echo "SDK_ROOT=$ANDROID_SDK_ROOT"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          cat local.properties
           ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
           echo "exitcode=$?" >> $GITHUB_OUTPUT
 
