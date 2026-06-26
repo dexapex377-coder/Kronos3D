@@ -81,7 +81,6 @@ Java_com_kronos3d_MainActivity_nativeInit(JNIEnv* env, jobject obj, jobject surf
             LOGE("OpenGL ES init failed!");
             return JNI_FALSE;
         }
-        g_engine->gl_renderer->upload_mesh(g_engine->scene_mesh);
     }
 
     g_engine->last_frame_time = 0;
@@ -104,6 +103,8 @@ Java_com_kronos3d_MainActivity_nativeResize(JNIEnv* env, jobject obj, jint width
 JNIEXPORT void JNICALL
 Java_com_kronos3d_MainActivity_nativeRender(JNIEnv* env, jobject obj) {
     if (!g_engine || !g_engine->running) return;
+    static int frame_count = 0;
+    if (++frame_count % 60 == 0) LOGI("nativeRender frame %d", frame_count);
 
     static timespec last_ts = {};
     timespec ts;
@@ -124,6 +125,10 @@ Java_com_kronos3d_MainActivity_nativeRender(JNIEnv* env, jobject obj) {
         static bool first = true;
         static opengl::GLMesh cached_mesh;
         if (first) {
+            eglMakeCurrent(g_engine->gl_ctx->display,
+                          g_engine->gl_ctx->surface,
+                          g_engine->gl_ctx->surface,
+                          g_engine->gl_ctx->context);
             cached_mesh = g_engine->gl_renderer->upload_mesh(g_engine->scene_mesh);
             first = false;
         }
