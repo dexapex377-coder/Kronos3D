@@ -13,7 +13,7 @@ inline const uint8_t PERM[512] = {
 };
 
 inline float fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-inline float lerp(float a, float b, float t) { return a + t * (b - a); }
+
 inline float grad(int hash, float x, float y, float z) {
     int h = hash & 15;
     float u = h < 8 ? x : y;
