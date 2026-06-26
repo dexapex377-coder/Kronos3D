@@ -24,8 +24,24 @@ jobs:
             cmake;3.22.1
             ndk;26.1.10909125
 
-      - name: Setup local.properties
+      - name: Verify SDK
+        run: |
+          echo "SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls -la "$ANDROID_SDK_ROOT/"
+          ls -la "$ANDROID_SDK_ROOT/platforms/" || echo "NO PLATFORMS"
+          ls -la "$ANDROID_SDK_ROOT/build-tools/" || echo "NO BUILD-TOOLS"
+          ls -la "$ANDROID_SDK_ROOT/ndk/" || echo "NO NDK"
+          ls -la "$ANDROID_SDK_ROOT/cmake/" || echo "NO CMAKE"
+          which cmake && cmake --version
+
+      - name: Setup proj
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Debug Gradle
+        run: |
+          ./gradlew --version --no-daemon 2>&1 | tail -5
+          echo "--- projects ---"
+          ./gradlew projects --no-daemon 2>&1 | tail -20
 
       - name: Build
         run: |
