@@ -90,6 +90,7 @@ void GLRenderer::cleanup() {
 }
 
 void GLRenderer::resize(int width, int height) {
+    if (!ctx_) return;
     ctx_->width = width;
     ctx_->height = height;
     glViewport(0, 0, width, height);
