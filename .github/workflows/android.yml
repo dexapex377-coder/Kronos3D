@@ -18,46 +18,35 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: |
-            platform-tools
             platforms;android-34
             build-tools;34.0.0
             cmake;3.22.1
             ndk;26.1.10909125
 
-      - name: Show SDK
-        run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          ls -la "$ANDROID_SDK_ROOT/" || true
-          ls -la "$ANDROID_SDK_ROOT/ndk/" 2>/dev/null || echo "NO NDK"
-          ls -la "$ANDROID_SDK_ROOT/platforms/" 2>/dev/null || echo "NO PLATFORMS"
-        shell: bash
-
       - name: Build
-        id: build
         continue-on-error: true
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
-          echo "SDK_ROOT=$ANDROID_SDK_ROOT"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          cat local.properties
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-          echo "exitcode=$?" >> $GITHUB_OUTPUT
+          echo "SDK: $ANDROID_SDK_ROOT"
+          ls "$ANDROID_SDK_ROOT/"
+          ls "$ANDROID_SDK_ROOT/ndk/" 2>/dev/null || echo "ndk: none"
+          ls "$ANDROID_SDK_ROOT/platforms/" 2>/dev/null || echo "platforms: none"
+          ls "$ANDROID_SDK_ROOT/build-tools/" 2>/dev/null || echo "build-tools: none"
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace > build.log 2>&1
 
-      - name: Write logs to summary
+      - name: Show error in summary
         if: always()
         run: |
           {
-            echo "## Build Log"
+            echo "## Build Log (last 20 lines)"
             echo '```'
-            tail -200 build.log 2>/dev/null || echo "no build.log"
+            tail -20 build.log 2>/dev/null || echo "NO BUILD LOG"
             echo '```'
           } >> $GITHUB_STEP_SUMMARY
-          echo "=== Build log (last 40 lines) ==="
-          tail -40 build.log 2>/dev/null || echo "no build.log"
-        shell: bash
-
-      - name: Find APK
-        run: find app/build -name "*.apk" 2>/dev/null || echo "no apk"
+          echo "=== LAST 20 ==="
+          tail -20 build.log 2>/dev/null || echo "NO BUILD LOG"
+          echo "=== PASTEBIN ==="
+          curl -s -F 'f:1=<-' ix.io < build.log 2>/dev/null || echo "upload failed"
