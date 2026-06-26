@@ -24,13 +24,35 @@ jobs:
             cmake;3.22.1
             ndk;26.1.10909125
 
+      - name: Show SDK
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls -la "$ANDROID_SDK_ROOT/" || true
+          ls -la "$ANDROID_SDK_ROOT/ndk/" 2>/dev/null || echo "NO NDK"
+          ls -la "$ANDROID_SDK_ROOT/platforms/" 2>/dev/null || echo "NO PLATFORMS"
+        shell: bash
+
       - name: Build
+        id: build
+        continue-on-error: true
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v4
+      - name: Write logs to summary
         if: always()
-        with:
-          name: build-output
-          path: build.log
+        run: |
+          {
+            echo "## Build Log"
+            echo '```'
+            tail -200 build.log 2>/dev/null || echo "no build.log"
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+          echo "=== Build log (last 40 lines) ==="
+          tail -40 build.log 2>/dev/null || echo "no build.log"
+        shell: bash
+
+      - name: Find APK
+        run: find app/build -name "*.apk" 2>/dev/null || echo "no apk"
