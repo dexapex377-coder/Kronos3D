@@ -48,7 +48,7 @@ add_definitions(-DKRONOS_VULKAN)
 file(GLOB_RECURSE KRONOS_GLES_SOURCES opengl/*.cpp)
 add_library(kronos_gles STATIC ${KRONOS_GLES_SOURCES})
 target_link_libraries(kronos_gles PUBLIC kronos_math kronos_mesh)
-target_link_libraries(kronos_gles PUBLIC GLESv2 EGL)
+target_link_libraries(kronos_gles PUBLIC GLESv3 EGL)
 
 # JNI Bridge (shared library)
 file(GLOB_RECURSE KRONOS_JNI_SOURCES jni/*.cpp)
@@ -62,7 +62,7 @@ target_link_libraries(kronos_jni PUBLIC
     kronos_gles
     android
     log
-    GLESv2
+    GLESv3
     EGL
     nativewindow
 )
