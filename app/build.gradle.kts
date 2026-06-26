@@ -15,7 +15,12 @@ android {
         versionName = "1.0.0"
 
         ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+            val abiFilter = project.properties["abi"]?.toString()
+            if (abiFilter != null) {
+                abiFilters.add(abiFilter)
+            } else {
+                abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+            }
         }
 
         externalNativeBuild {
