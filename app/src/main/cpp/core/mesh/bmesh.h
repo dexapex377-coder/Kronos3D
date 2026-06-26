@@ -85,13 +85,11 @@ struct BMesh {
         // Face normals
         for (auto& f : faces) {
             if (f.len < 3) { f.no = {0,0,0}; continue; }
-            BMLoop* l = f.loops;
             Vec3 n = {0,0,0};
-            for (int i = 0; i < f.len; ++i, l = l->next) {
-                Vec3 v1 = l->vert->co;
-                Vec3 v2 = l->next->vert->co;
-                n = n + cross(v1, v2);
-            }
+            Vec3 v0 = f.loops->vert->co;
+            Vec3 v1 = f.loops->next->vert->co;
+            Vec3 v2 = f.loops->next->next->vert->co;
+            n = cross(v1 - v0, v2 - v0);
             f.no = normalize(n);
         }
         // Vertex normals (average of face normals)
@@ -124,8 +122,8 @@ struct BMesh {
             BMVert v; v.co = coords[i]; bm.verts.push_back(v);
         }
         int face_verts[6][4] = {
-            {0,1,2,3}, {4,7,6,5}, {0,4,5,1},
-            {1,5,6,2}, {2,6,7,3}, {3,7,4,0}
+            {0,3,2,1}, {4,5,6,7}, {0,1,5,4},
+            {1,2,6,5}, {2,3,7,6}, {3,0,4,7}
         };
         for (int fi = 0; fi < 6; ++fi) {
             BMFace f; f.len = 4; f.mat_nr = 0;
