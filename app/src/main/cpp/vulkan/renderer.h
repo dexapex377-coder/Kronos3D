@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_android.h>
+#include <android/native_window.h>
 #include <vector>
 #include <array>
 #include <memory>
@@ -124,6 +126,8 @@ private:
     bool create_pipeline_layout();
     bool create_graphics_pipeline();
     bool create_command_pool();
+    bool create_depth_resources();
+    bool create_framebuffers();
     bool create_command_buffers();
     bool create_sync_objects();
     bool create_uniform_buffers();

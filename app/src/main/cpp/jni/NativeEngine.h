@@ -50,7 +50,8 @@ struct EngineState {
         float x = camera_distance * cosf(camera_pitch) * sinf(camera_yaw);
         float y = camera_distance * sinf(camera_pitch);
         float z = camera_distance * cosf(camera_pitch) * cosf(camera_yaw);
-        camera_pos = {x, y, z} + camera_target;
+        Vec3 offset = {x, y, z};
+        camera_pos = offset + camera_target;
         view_matrix = Mat4::look_at(camera_pos, camera_target, {0, 1, 0});
     }
 

@@ -118,7 +118,7 @@ Java_com_kronos3d_MainActivity_nativeRender(JNIEnv* env, jobject obj) {
         uniforms.model = Mat4::identity();
         uniforms.view = g_engine->view_matrix;
         uniforms.proj = g_engine->proj_matrix;
-        uniforms.normal_matrix = Mat4::inverse(uniforms.model);
+        uniforms.normal_matrix = inverse(uniforms.model);
         uniforms.camera_pos = g_engine->camera_pos;
         uniforms.time = g_engine->total_time;
         g_engine->gl_renderer->draw_frame(uniforms, cached_mesh);
