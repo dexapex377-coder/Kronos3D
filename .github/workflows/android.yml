@@ -24,8 +24,12 @@ jobs:
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
 
+      - name: APK info
+        run: |
+          find app/build -name "*.apk" -exec ls -lh {} \;
+          echo "--- APK size ---"
+
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: build-output
-          path: build.log
+          name: kronos3d-apk
+          path: app/build/outputs/apk/**/*.apk
