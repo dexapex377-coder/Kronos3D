@@ -145,7 +145,7 @@ Java_com_kronos3d_MainActivity_nativeTouchEvent(JNIEnv* env, jobject obj, jint a
     if (action == 0) { last_x = x; last_y = y; return; }
     float dx = x - last_x, dy = y - last_y;
     last_x = x; last_y = y;
-    const float sensitivity = 0.005f;
+    const float sensitivity = 0.002f;
     if (action == 2) g_engine->orbit(dx * sensitivity, dy * sensitivity);
 }
 

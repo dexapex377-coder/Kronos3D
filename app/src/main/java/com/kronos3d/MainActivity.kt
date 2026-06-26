@@ -87,23 +87,23 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private var lastTouchY = 0f
 
     private fun handleTouchEvent(event: MotionEvent): Boolean {
-        val action = event.actionMasked
-        val pointerIndex = event.actionIndex
-        val x = event.getX(pointerIndex)
-        val y = event.getY(pointerIndex)
-        val pressure = event.getPressure(pointerIndex)
-
-        when (action) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                lastTouchX = x; lastTouchY = y
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchX = event.x
+                lastTouchY = event.y
+                nativeTouchEvent(MotionEvent.ACTION_DOWN, event.x, event.y, event.pressure)
             }
             MotionEvent.ACTION_MOVE -> {
-                for (i in 0 until event.pointerCount) {
-                    nativeTouchEvent(action, event.getX(i), event.getY(i), event.getPressure(i))
+                val dx = event.x - lastTouchX
+                val dy = event.y - lastTouchY
+                if (kotlin.math.abs(dx) > 1f || kotlin.math.abs(dy) > 1f) {
+                    nativeTouchEvent(MotionEvent.ACTION_MOVE, event.x, event.y, event.pressure)
+                    lastTouchX = event.x
+                    lastTouchY = event.y
                 }
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
-                nativeTouchEvent(action, x, y, pressure)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                nativeTouchEvent(MotionEvent.ACTION_UP, event.x, event.y, event.pressure)
             }
         }
         return true

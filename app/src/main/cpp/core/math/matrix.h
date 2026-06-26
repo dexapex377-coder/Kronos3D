@@ -52,8 +52,8 @@ struct Mat4 {
         r.m[0][0] = f / aspect;
         r.m[1][1] = f;
         r.m[2][2] = (far + near) / (near - far);
-        r.m[2][3] = (2.0f * far * near) / (near - far);
-        r.m[3][2] = -1.0f;
+        r.m[2][3] = -1.0f;
+        r.m[3][2] = (2.0f * far * near) / (near - far);
         return r;
     }
 
