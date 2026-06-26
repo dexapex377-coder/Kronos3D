@@ -74,13 +74,9 @@ Java_com_kronos3d_MainActivity_nativeInit(JNIEnv* env, jobject obj, jobject surf
     }
 
     if (!g_engine->use_vulkan) {
-        LOGI("Initializing OpenGL ES renderer...");
+        LOGI("OpenGL ES renderer objects created (lazy init on render thread)");
         g_engine->gl_ctx = std::make_unique<opengl::GLContext>();
         g_engine->gl_renderer = std::make_unique<opengl::GLRenderer>();
-        if (!g_engine->gl_renderer->init(*g_engine->gl_ctx, g_engine->window, width, height)) {
-            LOGE("OpenGL ES init failed!");
-            return JNI_FALSE;
-        }
     }
 
     g_engine->last_frame_time = 0;
@@ -103,8 +99,6 @@ Java_com_kronos3d_MainActivity_nativeResize(JNIEnv* env, jobject obj, jint width
 JNIEXPORT void JNICALL
 Java_com_kronos3d_MainActivity_nativeRender(JNIEnv* env, jobject obj) {
     if (!g_engine || !g_engine->running) return;
-    static int frame_count = 0;
-    if (++frame_count % 60 == 0) LOGI("nativeRender frame %d", frame_count);
 
     static timespec last_ts = {};
     timespec ts;
@@ -125,10 +119,11 @@ Java_com_kronos3d_MainActivity_nativeRender(JNIEnv* env, jobject obj) {
         static bool first = true;
         static opengl::GLMesh cached_mesh;
         if (first) {
-            eglMakeCurrent(g_engine->gl_ctx->display,
-                          g_engine->gl_ctx->surface,
-                          g_engine->gl_ctx->surface,
-                          g_engine->gl_ctx->context);
+            LOGI("Initializing OpenGL ES on render thread...");
+            if (!g_engine->gl_renderer->init(*g_engine->gl_ctx, g_engine->window, g_engine->width, g_engine->height)) {
+                LOGE("OpenGL ES init failed on render thread!");
+                return;
+            }
             cached_mesh = g_engine->gl_renderer->upload_mesh(g_engine->scene_mesh);
             first = false;
         }
