@@ -32,7 +32,6 @@ android {
                     "-frtti",
                     "-O3",
                     "-ffast-math",
-                    "-flto=thin",
                     "-DANDROID",
                     "-DKRONOS_GLES32",
                     "-DKRONOS_VULKAN",

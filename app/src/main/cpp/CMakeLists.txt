@@ -10,31 +10,11 @@ if(ANDROID)
     set(CMAKE_SYSTEM_NAME Android)
 endif()
 
-# Find Vulkan via NDK (not find_package - no .cmake in NDK)
-find_library(Vulkan_LIBRARY vulkan)
-find_path(Vulkan_INCLUDE_DIR vulkan/vulkan.h)
-
-# Find OpenGL ES and EGL
-find_library(GLESv3_LIBRARY GLESv3)
-find_library(EGL_LIBRARY EGL)
-find_library(NATIVE_WINDOW_LIBRARY nativewindow)
-
-if(NOT GLESv3_LIBRARY)
-    message(WARNING "GLESv3 not found, trying GLESv2")
-    find_library(GLESv3_LIBRARY GLESv2)
-endif()
-
-message(STATUS "Vulkan lib: ${Vulkan_LIBRARY}")
-message(STATUS "Vulkan include: ${Vulkan_INCLUDE_DIR}")
-message(STATUS "GLESv3: ${GLESv3_LIBRARY}")
-message(STATUS "EGL: ${EGL_LIBRARY}")
-
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/core
     ${CMAKE_CURRENT_SOURCE_DIR}/vulkan
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl
     ${CMAKE_CURRENT_SOURCE_DIR}/jni
-    ${Vulkan_INCLUDE_DIR}
 )
 
 # Core math library
@@ -57,32 +37,18 @@ file(GLOB_RECURSE KRONOS_CYCLES_SOURCES core/cycles/*.cpp)
 add_library(kronos_cycles STATIC ${KRONOS_CYCLES_SOURCES})
 target_link_libraries(kronos_cycles PUBLIC kronos_math kronos_mesh)
 
-# Vulkan Renderer (optional - only if Vulkan found)
-if(Vulkan_LIBRARY AND Vulkan_INCLUDE_DIR)
-    message(STATUS "Vulkan found, building Vulkan renderer")
-    file(GLOB_RECURSE KRONOS_VULKAN_SOURCES vulkan/*.cpp)
-    add_library(kronos_vulkan STATIC ${KRONOS_VULKAN_SOURCES})
-    target_link_libraries(kronos_vulkan PUBLIC
-        kronos_math kronos_mesh
-        ${Vulkan_LIBRARY}
-        ${NATIVE_WINDOW_LIBRARY}
-    )
-    target_include_directories(kronos_vulkan PUBLIC ${Vulkan_INCLUDE_DIR})
-    add_definitions(-DKRONOS_VULKAN)
-else()
-    message(WARNING "Vulkan not found, disabling Vulkan renderer")
-    add_library(kronos_vulkan STATIC)
-    add_definitions(-DKRONOS_NO_VULKAN)
-endif()
+# Vulkan Renderer
+file(GLOB_RECURSE KRONOS_VULKAN_SOURCES vulkan/*.cpp)
+add_library(kronos_vulkan STATIC ${KRONOS_VULKAN_SOURCES})
+target_link_libraries(kronos_vulkan PUBLIC kronos_math kronos_mesh)
+target_link_libraries(kronos_vulkan PUBLIC vulkan nativewindow)
+add_definitions(-DKRONOS_VULKAN)
 
 # OpenGL ES 3.2 Renderer
 file(GLOB_RECURSE KRONOS_GLES_SOURCES opengl/*.cpp)
 add_library(kronos_gles STATIC ${KRONOS_GLES_SOURCES})
-target_link_libraries(kronos_gles PUBLIC
-    kronos_math kronos_mesh
-    ${GLESv3_LIBRARY}
-    ${EGL_LIBRARY}
-)
+target_link_libraries(kronos_gles PUBLIC kronos_math kronos_mesh)
+target_link_libraries(kronos_gles PUBLIC GLESv2 EGL)
 
 # JNI Bridge (shared library)
 file(GLOB_RECURSE KRONOS_JNI_SOURCES jni/*.cpp)
@@ -96,11 +62,7 @@ target_link_libraries(kronos_jni PUBLIC
     kronos_gles
     android
     log
-    ${GLESv3_LIBRARY}
-    ${EGL_LIBRARY}
-    ${NATIVE_WINDOW_LIBRARY}
+    GLESv2
+    EGL
+    nativewindow
 )
-
-if(ANDROID)
-    target_link_options(kronos_jni PRIVATE -Wl,--no-warn-mismatch)
-endif()
